@@ -4,8 +4,17 @@ FROM cirrusci/flutter:stable
 # Set the working directory
 WORKDIR /app
 
+# Set environment variables
+ENV FLUTTER_ROOT=/sdks/flutter
+
 # Copy the current directory contents into the container at /app
 COPY . /app
+
+# Change ownership of the Flutter SDK directory to avoid permission issues
+RUN chown -R root:root /sdks/flutter
+
+# Add the Flutter SDK to the safe directories in Git
+RUN git config --global --add safe.directory /sdks/flutter
 
 # Get Flutter dependencies
 RUN flutter pub get
