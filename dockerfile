@@ -4,11 +4,12 @@ FROM cirrusci/flutter:stable
 # Set the working directory
 WORKDIR /app
 
-# Set environment variables
-ENV FLUTTER_ROOT=/sdks/flutter
-
 # Copy the current directory contents into the container at /app
 COPY . /app
+
+# Set environment variables
+ENV FLUTTER_ROOT=/sdks/flutter
+ENV PATH=$FLUTTER_ROOT/bin:$PATH
 
 # Change ownership of the Flutter SDK directory to avoid permission issues
 RUN chown -R root:root /sdks/flutter
