@@ -1,5 +1,33 @@
-# Use the official Flutter image as a base image
-FROM cirrusci/flutter:stable
+# Use the official Flutter image as the base image
+FROM cirrusci/flutter:latest
+
+# Install additional dependencies for Android and iOS
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    unzip \
+    xz-utils \
+    zip \
+    lib32stdc++6 \
+    libglu1-mesa \
+    openjdk-11-jdk \
+    && apt-get clean
+
+# Set environment variables for Android SDK
+ENV ANDROID_SDK_ROOT /opt/android-sdk
+ENV PATH ${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/tools/bin:${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/emulator
+
+# Install Android SDK components
+RUN yes | sdkmanager --licenses && \
+    sdkmanager "platform-tools" \
+               "platforms;android-30" \
+               "build-tools;30.0.3"
+
+# Install CocoaPods for iOS dependencies
+RUN gem install cocoapods
+
+# Clean up
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Set the working directory
 WORKDIR /app
@@ -7,24 +35,11 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-# Set environment variables
-ENV FLUTTER_ROOT=/sdks/flutter
-ENV PATH=$FLUTTER_ROOT/bin:$PATH
+# Run the Flutter doctor command to verify the installation
+RUN flutter doctor
 
-# Change ownership of the Flutter SDK directory to avoid permission issues
-RUN chown -R root:root /sdks/flutter
+# Expose any necessary ports (optional)
+EXPOSE 8080
 
-# Add the Flutter SDK to the safe directories in Git
-RUN git config --global --add safe.directory /sdks/flutter
-
-# Get Flutter dependencies
-RUN flutter pub get
-
-# Run tests (if you have any)
-# RUN flutter test
-
-# Build the app (for Android)
-RUN flutter build apk --release
-
-# Build the app (for iOS, requires macOS and is often done on a different agent)
-# RUN flutter build ios --release
+# Set the default command to run when starting the container
+CMD ["bash"]
