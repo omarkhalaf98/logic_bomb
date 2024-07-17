@@ -1,7 +1,5 @@
-# Use the official Flutter image as the base image
 FROM cirrusci/flutter:latest
 
-# Install additional dependencies for Android and iOS
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -26,20 +24,18 @@ RUN yes | sdkmanager --licenses && \
 # Install CocoaPods for iOS dependencies
 RUN gem install cocoapods
 
-# Clean up
+
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Set the working directory
+
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
 COPY . /app
 
-# Run the Flutter doctor command to verify the installation
 RUN flutter doctor
 
-# Expose any necessary ports (optional)
+
 EXPOSE 8080
 
-# Set the default command to run when starting the container
+
 CMD ["bash"]
